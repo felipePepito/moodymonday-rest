@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, OnModuleInit } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { MoodState } from "../entities/mood-state.entity";
 import { Repository } from "typeorm";
@@ -12,10 +12,16 @@ export class MoodStateService{
 	) {}
 
 	findAll(): Promise<Array<MoodState>> {
-		return this.moodStateRepository.find();
+		return this.moodStateRepository.find()
+			.catch(
+				reason => { throw new InternalServerErrorException(); }
+			);
 	}
 
 	create(moodState: MoodState) {
-		this.moodStateRepository.save(moodState);
+		return this.moodStateRepository.save(moodState)
+			.catch(
+				reason => { throw new InternalServerErrorException(); }
+			);
 	}
 }

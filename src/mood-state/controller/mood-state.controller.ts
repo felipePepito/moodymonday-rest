@@ -16,7 +16,7 @@ export class MoodStateController {
 	}
 
 	@Post()
-	create(@Body() mdto: MoodStateDto) {
-		this.moodStateService.create(mdto);
+	async create(@Body() mdto: MoodStateDto) {
+		return await this.moodStateService.create(mdto);
 	}
 }
