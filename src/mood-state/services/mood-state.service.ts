@@ -18,7 +18,7 @@ export class MoodStateService{
 			);
 	}
 
-	create(moodState: MoodState) {
+	create(moodState: MoodState): Promise<MoodState> {
 		return this.moodStateRepository.save(moodState)
 			.catch(
 				reason => { throw new InternalServerErrorException(); }
