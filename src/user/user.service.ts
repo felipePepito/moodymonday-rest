@@ -1,20 +1,26 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { User } from "../entities/user.entity";
 import { Repository } from "typeorm";
-import { UserDto } from "../dto/user.dto";
+import { User } from "../auth/entities/user.entity";
+import { UserDto } from "../auth/dto/user.dto";
 import * as argon2 from "argon2";
 
 @Injectable()
 export class UserService {
+
+	private readonly logger = new Logger('UsersService');
 
 	constructor(
 		@InjectRepository(User)
 		private userRepository: Repository<User>
 	) {}
 
-	create(udto: UserDto): Promise<User> {
+	findOne(email: string): Promise<User | void> {
+		return this.userRepository.findOne({where: {email}})
+			.catch(reason => this.logger.log(reason));
+	}
 
+	async create(udto: UserDto): Promise<User> {
 		const user: User = {
 			id: undefined,
 			email: udto.email,
@@ -25,13 +31,14 @@ export class UserService {
 				user.passwordDigest = digest;
 				return this.userRepository.save(user)
 					.catch(
-						reason => { throw new InternalServerErrorException(reason.toString()); }
+						reason => {
+							this.logger.error(reason);
+							throw new InternalServerErrorException(reason.toString()); }
 					);
 			})
 			.catch(reason => {
-				console.log(reason);
+				this.logger.error(reason);
 				throw new InternalServerErrorException(reason.toString());
 			});
 	}
-
 }
