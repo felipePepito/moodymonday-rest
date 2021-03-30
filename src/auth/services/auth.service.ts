@@ -4,6 +4,7 @@ import { User } from "../entities/user.entity";
 import { Repository } from "typeorm";
 import { UserService } from "../../user/user.service";
 import * as argon2 from "argon2";
+import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,8 @@ export class AuthService {
 	constructor(
 		@InjectRepository(User)
 		private userRepository: Repository<User>,
-		private userService: UserService
+		private userService: UserService,
+		private jwtService: JwtService
 	) {}
 
 	async validateUser(email: string, password: string) {
@@ -25,7 +27,13 @@ export class AuthService {
 		} else {
 			return null;
 		}
+	}
 
+	async login(user: { id: number; email: string; }) {
+		const payload = { username: user.email, sub: user.id }
+		return {
+			access_token: this.jwtService.sign(payload)
+		}
 	}
 
 

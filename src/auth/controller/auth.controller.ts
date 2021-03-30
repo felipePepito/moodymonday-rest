@@ -2,13 +2,15 @@ import { Body, Controller, InternalServerErrorException, Post, Request, UseGuard
 import { UserDto } from "../dto/user.dto";
 import { UserService } from "../../user/user.service";
 import { AuthGuard } from "@nestjs/passport";
+import { AuthService } from "../services/auth.service";
 
 
 @Controller('auth')
 export class AuthController {
 
 	constructor(
-		private userService: UserService
+		private userService: UserService,
+		private authService: AuthService
 	) {
 	}
 
@@ -16,7 +18,7 @@ export class AuthController {
 	@UseGuards(AuthGuard('local'))
 	@Post('login')
 	async login(@Request() requ) {
-		return requ.user;
+		return this.authService.login({id: requ.id, email: requ.email});
 	}
 
 	@Post('signin')
