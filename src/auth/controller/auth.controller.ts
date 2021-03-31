@@ -1,4 +1,4 @@
-import { Body, Controller, InternalServerErrorException, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, InternalServerErrorException, Post, Request, UseGuards } from "@nestjs/common";
 import { UserDto } from "../dto/user.dto";
 import { UserService } from "../../user/user.service";
 import { AuthGuard } from "@nestjs/passport";
@@ -17,8 +17,14 @@ export class AuthController {
 	// Sidenote: AuthGuard / Passport returns a user object and assigns it to the Request
 	@UseGuards(AuthGuard('local'))
 	@Post('login')
-	async login(@Request() requ) {
-		return this.authService.login({id: requ.id, email: requ.email});
+	async login(@Request() req) {
+		return this.authService.login(req.user);
+	}
+
+	@UseGuards(AuthGuard('jwt'))
+	@Get('profile')
+	getProfile(@Request() req) {
+		return req.user
 	}
 
 	@Post('signin')
