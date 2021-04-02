@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { MoodState } from "../../mood-state/entities/mood-state.entity";
 
 @Entity()
 export class User {
@@ -10,5 +11,10 @@ export class User {
 
 	@Column()
 	passwordDigest: string;
+
+	@OneToMany(() => MoodState, moodstate => moodstate.user, {
+		onDelete: "CASCADE"
+	})
+	moodStates: MoodState[];
 
 }

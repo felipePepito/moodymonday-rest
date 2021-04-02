@@ -1,5 +1,6 @@
 import { IsDateString, IsNumber, IsOptional } from "class-validator";
 import { Column } from "typeorm";
+import { User } from "../../auth/entities/user.entity";
 
 export class MoodStateDto {
 	@IsOptional()
@@ -20,4 +21,6 @@ export class MoodStateDto {
 
 	@IsNumber()
 	sadness: number;
+
+	user: User;
 }

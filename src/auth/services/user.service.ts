@@ -1,8 +1,8 @@
-import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { User } from "../auth/entities/user.entity";
-import { UserDto } from "../auth/dto/user.dto";
+import { User } from "../entities/user.entity";
+import { UserDto } from "../dto/user.dto";
 import * as argon2 from "argon2";
 
 @Injectable()
@@ -21,11 +21,18 @@ export class UserService {
 	}
 
 	async create(udto: UserDto): Promise<User> {
-		const user: User = {
-			id: undefined,
-			email: udto.email,
-			passwordDigest: undefined
-		};
+
+		// Check if user already exists
+		const existingUser = await this.userRepository.findOne({
+			where: {email: udto.email}
+		});
+		if(existingUser) {
+			throw new BadRequestException('User already exists.');
+		}
+
+		const user = new User();
+		user.email = udto.email;
+
 		return argon2.hash(udto.password)
 			.then(digest => {
 				user.passwordDigest = digest;
@@ -33,7 +40,8 @@ export class UserService {
 					.catch(
 						reason => {
 							this.logger.error(reason);
-							throw new InternalServerErrorException(reason.toString()); }
+							throw new InternalServerErrorException(reason.toString());
+						}
 					);
 			})
 			.catch(reason => {

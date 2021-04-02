@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, OnModule
 import { InjectRepository } from "@nestjs/typeorm";
 import { MoodState } from "../entities/mood-state.entity";
 import { Repository } from "typeorm";
+import { User } from "../../auth/entities/user.entity";
 
 @Injectable()
 export class MoodStateService{
@@ -11,8 +12,10 @@ export class MoodStateService{
 		private moodStateRepository: Repository<MoodState>
 	) {}
 
-	findAll(): Promise<Array<MoodState>> {
-		return this.moodStateRepository.find()
+	findAll(user: User): Promise<Array<MoodState>> {
+		return this.moodStateRepository.find({
+			where: {user}
+		})
 			.catch(
 				reason => { throw new InternalServerErrorException(); }
 			);

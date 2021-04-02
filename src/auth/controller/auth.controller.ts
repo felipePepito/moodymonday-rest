@@ -1,12 +1,15 @@
-import { Body, Controller, Get, InternalServerErrorException, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, InternalServerErrorException, Logger, Post, Request, UseGuards } from "@nestjs/common";
 import { UserDto } from "../dto/user.dto";
-import { UserService } from "../../user/user.service";
-import { AuthGuard } from "@nestjs/passport";
+import { UserService } from "../services/user.service";
 import { AuthService } from "../services/auth.service";
+import { JwtGuard } from "../guards/jwt.guard";
+import { LocalGuard } from "../guards/local.guard";
 
 
 @Controller('auth')
 export class AuthController {
+
+	private logger = new Logger('Auth Service');
 
 	constructor(
 		private userService: UserService,
@@ -15,26 +18,23 @@ export class AuthController {
 	}
 
 	// Sidenote: AuthGuard / Passport returns a user object and assigns it to the Request
-	@UseGuards(AuthGuard('local'))
+	@UseGuards(LocalGuard)
 	@Post('login')
-	async login(@Request() req) {
+	async login(@Request() req): Promise<{access_token: string}> {
 		return this.authService.login(req.user);
 	}
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(JwtGuard)
 	@Get('profile')
 	getProfile(@Request() req) {
 		return req.user
 	}
 
-	@Post('signin')
-	async signin(@Body() userdto: UserDto): Promise<{id: number}> {
+	@Post('register')
+	async register(@Body() userdto: UserDto): Promise<{access_token: string}> {
 		return await this.userService.create(userdto)
 			.then(
-				user => { return {id: user.id} }
+				user => { return this.authService.login(user) }
 				)
-			.catch(
-				reason => { throw new InternalServerErrorException(); }
-			)
 	}
 }

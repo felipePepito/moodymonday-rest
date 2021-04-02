@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "../../auth/entities/user.entity";
 
 @Entity()
 export class MoodState {
@@ -19,4 +20,9 @@ export class MoodState {
 
 	@Column()
 	sadness: number;
+
+	@ManyToOne(() => User, user => user.moodStates, {
+		onDelete: "CASCADE"
+	})
+	user: User;
 }
