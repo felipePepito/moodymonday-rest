@@ -5,7 +5,7 @@ import { Repository } from "typeorm";
 import { UserService } from "./user.service";
 import * as argon2 from "argon2";
 import { JwtService } from "@nestjs/jwt";
-import { UserInterface } from "../user.interface";
+import { UserReturnDto } from "../dto/user.return.dto";
 
 @Injectable()
 export class AuthService {
@@ -19,21 +19,18 @@ export class AuthService {
 		private jwtService: JwtService
 	) {}
 
-	async validateUser(email: string, password: string): Promise<UserInterface> {
+	async validateUser(email: string, password: string): Promise<UserReturnDto> {
 		const user = await this.userService.findOne(email);
 		if (user && await argon2.verify(user.passwordDigest, password)){
-			const {passwordDigest, ... result} = user;
-			return result;
+			return new UserReturnDto(user.id, user.username, user.email, undefined);
 		} else {
 			return null;
 		}
 	}
 
-	async login(user: UserInterface) {
-		const payload = { username: user.email, sub: user.id }
-		return {
-			access_token: this.jwtService.sign(payload)
-		}
+	async login(id, email): Promise<string> {
+		const payload = { username: email, sub: id }
+		return this.jwtService.sign(payload);
 	}
 
 

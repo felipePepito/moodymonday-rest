@@ -1,9 +1,8 @@
 import { IsEmail, IsNumber, IsOptional, IsString, MinLength } from "class-validator";
 
-export class UserDto {
-	@IsOptional()
-	@IsNumber()
-	id: number;
+export class UserRegisterDto {
+	@IsString()
+	username: string;
 
 	@IsEmail()
 	email: string;

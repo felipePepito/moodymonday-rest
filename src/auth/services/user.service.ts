@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger }
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "../entities/user.entity";
-import { UserDto } from "../dto/user.dto";
+import { UserRegisterDto } from "../dto/user.register.dto";
 import * as argon2 from "argon2";
 
 @Injectable()
@@ -20,7 +20,7 @@ export class UserService {
 			.catch(reason => this.logger.log(reason));
 	}
 
-	async create(udto: UserDto): Promise<User> {
+	async create(udto: UserRegisterDto): Promise<User> {
 
 		// Check if user already exists
 		const existingUser = await this.userRepository.findOne({
@@ -32,6 +32,7 @@ export class UserService {
 
 		const user = new User();
 		user.email = udto.email;
+		user.username = udto.username;
 
 		return argon2.hash(udto.password)
 			.then(digest => {
